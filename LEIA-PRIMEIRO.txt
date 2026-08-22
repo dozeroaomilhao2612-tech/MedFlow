@@ -1,0 +1,20 @@
+MEDFLOW V10 — ATLAS MÉDICO
+
+OBJETIVO
+Manter a estética da versão restaurada e reconstruir a experiência de questões.
+
+BANCO
+- 312 novas questões conceituais específicas por tema.
+- Banco autoral anterior preservado.
+- Cobertura das quatro etapas: 1º–4º, 5º–8º, 9º–12º e Residência/ENAMED.
+- O sistema evita repetir a mesma questão para completar artificialmente uma quantidade.
+- Questões genéricas de cobertura só são usadas como último fallback.
+
+REFERÊNCIAS
+- Biblioteca organizada por etapa.
+- Livros clássicos + diretrizes/documentos oficiais quando a atualização clínica é relevante.
+- Nenhum texto de livro é copiado para o aplicativo.
+
+PUBLICAÇÃO
+Faça novo Production Deploy no MESMO projeto medflowmedicina do Netlify.
+Envie todos os arquivos deste ZIP.

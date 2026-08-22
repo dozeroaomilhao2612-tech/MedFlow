@@ -1,0 +1,18 @@
+MEDFLOW V11 — CONFIGURADO PARA O SEU SUPABASE
+
+A URL do projeto e a chave publicável já foram inseridas.
+
+Próximos passos:
+1. Publique TODOS os arquivos desta pasta no mesmo projeto do Netlify.
+2. Abra o MEDFLOW.
+3. Crie uma conta de teste.
+4. Saia da conta.
+5. Crie uma segunda conta com outro e-mail.
+6. Confirme que a segunda conta começa limpa.
+7. Volte à primeira conta e confirme que seus dados reaparecem.
+
+Importante:
+- O projeto usa apenas a chave publicável no frontend.
+- NÃO coloque service_role ou secret key no site.
+- As tabelas profiles e user_app_state devem existir.
+- As políticas RLS devem permanecer ativadas.
