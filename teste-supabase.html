@@ -97,6 +97,10 @@ e o Supabase.
   3. Testar cadastro direto
 </button>
 
+  <button onclick="testarEdgeFunction()">
+  4. Testar Edge Function
+</button>
+
 <h2>Resultado</h2>
 
 <pre id="resultado">Aguardando teste...</pre>
@@ -228,6 +232,35 @@ async function testarCadastro() {
       "\nMensagem: " + erro.message +
       "\n\nStack:\n" +
       (erro.stack || "sem stack")
+    );
+  }
+}
+
+  async function testarEdgeFunction() {
+  try {
+    mostrar("Testando Edge Function...");
+
+    const resposta = await fetch(
+      "https://bkntczfttyyyhmmclwp.supabase.co/functions/v1/medflow-proxy",
+      {
+        method: "GET"
+      }
+    );
+
+    const texto = await resposta.text();
+
+    mostrar(
+      "HTTP STATUS: " + resposta.status +
+      "\n\nRESPOSTA:\n" + texto,
+      resposta.ok
+    );
+
+  } catch (erro) {
+    mostrar(
+      "ERRO EDGE FUNCTION:\n\n" +
+      erro.name +
+      "\n\n" +
+      erro.message
     );
   }
 }
