@@ -140,9 +140,12 @@ async function testarServidor() {
     const key = window.MEDFLOW_SUPABASE_ANON_KEY;
     
     const resposta = await fetch(
-  url + "/rest/v1/?apikey=" + encodeURIComponent(key),
+  url + "/auth/v1/health",
   {
-    method: "GET"
+    method: "GET",
+    headers: {
+      "apikey": key
+    }
   }
 );
       
