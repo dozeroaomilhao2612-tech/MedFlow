@@ -144,8 +144,7 @@ async function testarServidor() {
       {
         method: "GET",
         headers: {
-          "apikey": key,
-          "Authorization": "Bearer " + key
+          "apikey": key
         }
       }
     );
@@ -199,8 +198,7 @@ async function testarCadastro() {
 
         headers: {
           "Content-Type": "application/json",
-          "apikey": key,
-          "Authorization": "Bearer " + key
+          "apikey": key
         },
 
         body: JSON.stringify({
