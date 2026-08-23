@@ -138,16 +138,14 @@ async function testarServidor() {
 
     const url = window.MEDFLOW_SUPABASE_URL;
     const key = window.MEDFLOW_SUPABASE_ANON_KEY;
-
+    
     const resposta = await fetch(
-      url + "/rest/v1/",
-      {
-        method: "GET",
-        headers: {
-          "apikey": key
-        }
-      }
-    );
+  url + "/rest/v1/?apikey=" + encodeURIComponent(key),
+  {
+    method: "GET"
+  }
+);
+      
 
     const texto = await resposta.text();
 
