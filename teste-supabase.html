@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teste Supabase - MEDFLOW</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #080b1d;
+      color: white;
+      padding: 30px;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    h1 {
+      color: #8b5cf6;
+    }
+
+    button {
+      width: 100%;
+      padding: 16px;
+      margin: 10px 0;
+      border: 0;
+      border-radius: 10px;
+      background: #7047eb;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 14px;
+      margin: 7px 0;
+      border-radius: 8px;
+      border: 1px solid #444;
+      font-size: 16px;
+    }
+
+    pre {
+      background: #11162b;
+      padding: 15px;
+      border-radius: 10px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 100px;
+    }
+
+    .ok {
+      color: #59dda0;
+    }
+
+    .erro {
+      color: #ffb84d;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>MEDFLOW — Diagnóstico Supabase</h1>
+
+<p>
+Esta página testa diretamente a comunicação entre o navegador
+e o Supabase.
+</p>
+
+<button onclick="testarConfig()">
+  1. Testar configuração
+</button>
+
+<button onclick="testarServidor()">
+  2. Testar servidor
+</button>
+
+<hr>
+
+<h2>Teste de cadastro</h2>
+
+<input
+  id="email"
+  type="email"
+  placeholder="Digite um e-mail de teste"
+>
+
+<input
+  id="senha"
+  type="password"
+  placeholder="Digite uma senha com pelo menos 6 caracteres"
+>
+
+<button onclick="testarCadastro()">
+  3. Testar cadastro direto
+</button>
+
+<h2>Resultado</h2>
+
+<pre id="resultado">Aguardando teste...</pre>
+
+
+<script src="supabase-config.js"></script>
+
+<script>
+
+const resultado = document.getElementById("resultado");
+
+function mostrar(texto, ok = false) {
+  resultado.className = ok ? "ok" : "erro";
+  resultado.textContent = texto;
+}
+
+
+function testarConfig() {
+
+  const url = window.MEDFLOW_SUPABASE_URL;
+  const key = window.MEDFLOW_SUPABASE_ANON_KEY;
+
+  mostrar(
+    "URL encontrada: " + url +
+    "\n\nChave encontrada: " +
+    (key ? key.substring(0, 20) + "..." : "NÃO ENCONTRADA") +
+    "\n\nTipo URL: " + typeof url +
+    "\nTipo chave: " + typeof key,
+    Boolean(url && key)
+  );
+}
+
+
+async function testarServidor() {
+
+  try {
+
+    mostrar("Testando servidor...");
+
+    const url = window.MEDFLOW_SUPABASE_URL;
+    const key = window.MEDFLOW_SUPABASE_ANON_KEY;
+
+    const resposta = await fetch(
+      url + "/rest/v1/",
+      {
+        method: "GET",
+        headers: {
+          "apikey": key,
+          "Authorization": "Bearer " + key
+        }
+      }
+    );
+
+    const texto = await resposta.text();
+
+    mostrar(
+      "HTTP STATUS: " + resposta.status +
+      "\n\nRESPOSTA:\n" + texto,
+      resposta.status < 500
+    );
+
+  } catch (erro) {
+
+    mostrar(
+      "ERRO JAVASCRIPT:\n\n" +
+      erro.name +
+      "\n\n" +
+      erro.message +
+      "\n\nStack:\n" +
+      (erro.stack || "sem stack")
+    );
+  }
+}
+
+
+async function testarCadastro() {
+
+  const email =
+    document.getElementById("email").value.trim();
+
+  const senha =
+    document.getElementById("senha").value;
+
+  if (!email || !senha) {
+    mostrar("Digite e-mail e senha.");
+    return;
+  }
+
+  try {
+
+    mostrar("Enviando cadastro diretamente ao Supabase...");
+
+    const url = window.MEDFLOW_SUPABASE_URL;
+    const key = window.MEDFLOW_SUPABASE_ANON_KEY;
+
+    const resposta = await fetch(
+      url + "/auth/v1/signup",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": key,
+          "Authorization": "Bearer " + key
+        },
+
+        body: JSON.stringify({
+          email: email,
+          password: senha,
+          data: {
+            name: "Teste MEDFLOW",
+            period: 2
+          }
+        })
+      }
+    );
+
+    const texto = await resposta.text();
+
+    mostrar(
+      "HTTP STATUS: " + resposta.status +
+      "\n\nRESPOSTA DO SUPABASE:\n\n" +
+      texto,
+      resposta.ok
+    );
+
+  } catch (erro) {
+
+    mostrar(
+      "FALHA DE FETCH\n\n" +
+      "Nome: " + erro.name +
+      "\nMensagem: " + erro.message +
+      "\n\nStack:\n" +
+      (erro.stack || "sem stack")
+    );
+  }
+}
+
+</script>
+
+</body>
+</html>
