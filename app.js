@@ -413,5 +413,6 @@ function init(){
  $('#todayLabel').textContent=new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'}).format(new Date());bind();updateTimer();renderQuestionStats();nav(location.hash.slice(1)||'dashboard',false);renderSettings();
  if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).catch(()=>{}));
 }
+bind();
 init();
 })();
