@@ -200,18 +200,22 @@
       return;
     }
 
-    sb=window.supabase.createClient(
-      window.MEDFLOW_SUPABASE_URL,
-      window.MEDFLOW_SUPABASE_ANON_KEY,
-      {
-        global:{fetch:fetchWithRetry},
-        auth:{
-          persistSession:true,
-          autoRefreshToken:true,
-          detectSessionInUrl:true
-        }
-      }
-    );
+    sb = window.supabase.createClient(
+  window.MEDFLOW_SUPABASE_URL,
+  window.MEDFLOW_SUPABASE_ANON_KEY,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  }
+);
+  
+      
+
+
+
 
     window.medflowSupabase=sb;
 
