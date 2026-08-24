@@ -555,7 +555,50 @@ display:flex;align-items:center;justify-content:center;padding:22px}
 
 <div class="modal-backdrop" id="errorReasonModal" aria-hidden="true"><div class="modal" role="dialog" aria-modal="true"><div class="modal-head"><h3>Por que você errou?</h3><button class="icon-btn" data-close="errorReasonModal">×</button></div><div class="reason-grid"><button class="reason-btn" data-reason="knowledge">Não conhecia o conteúdo</button><button class="reason-btn" data-reason="confusion">Confundi conceitos</button><button class="reason-btn" data-reason="interpretation">Não interpretei bem o caso</button><button class="reason-btn" data-reason="attention">Distração</button><button class="reason-btn" data-reason="between">Fiquei entre duas alternativas</button><button class="reason-btn" data-reason="guess">Chutei</button></div></div></div>
 
+<!-- MEDFLOW - ASSISTENTE IA -->
 
+<button
+  id="aiFab"
+  type="button"
+  class="btn"
+  style="position:fixed;right:22px;bottom:22px;z-index:9000;">
+  ✦ Assistente IA
+</button>
+
+<div id="aiModal" class="modal-backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true">
+
+    <div class="modal-header">
+      <h3>Assistente IA</h3>
+      <button id="closeAiBtn" class="modal-close" type="button">×</button>
+    </div>
+
+    <p>Pergunte qualquer assunto relacionado aos seus estudos de Medicina.</p>
+
+    <textarea
+      id="aiQuestion"
+      rows="5"
+      placeholder="Ex.: Explique a fisiopatologia da meningite bacteriana."
+      style="width:100%;margin-top:12px;">
+    </textarea>
+
+    <button
+      id="askAiBtn"
+      type="button"
+      class="btn full"
+      style="margin-top:12px;">
+      Perguntar à IA
+    </button>
+
+    <div id="aiStatus" style="margin-top:14px;"></div>
+
+    <div
+      id="aiAnswer"
+      style="margin-top:14px;white-space:pre-wrap;">
+    </div>
+
+  </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js?v=11"></script>
 <script src="auth.js?v=11"></script>
