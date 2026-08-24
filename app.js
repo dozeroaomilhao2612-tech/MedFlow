@@ -371,7 +371,7 @@ function bind(){
  document.addEventListener('change',e=>{const el=e.target.closest('[data-topic-progress]');if(el){const[sid,tid]=el.dataset.topicProgress.split('|'),s=subject(sid),t=s?.topics.find(x=>x.id===tid);if(t){t.progress=Math.max(0,Math.min(100,Number(el.value)||0));recalcSubject(s);save();renderSubjects();renderDashboard()}}});
  $$('.modal-backdrop').forEach(m=>m.addEventListener('mousedown',e=>{if(e.target===m)closeModal(m.id)}));document.addEventListener('keydown',e=>{if(e.key==='Escape'){$$('.modal-backdrop.open').forEach(m=>closeModal(m.id))}});window.addEventListener('hashchange',()=>nav(location.hash.slice(1)||'dashboard',false));
 }
-function init(){ const MEDFLOW_AI_URL =
+ const MEDFLOW_AI_URL =
   'https://bkntczfttyyvyhmmclwp.supabase.co/functions/v1/medflow-proxy';
 
 async function perguntarIA(pergunta){
@@ -402,8 +402,9 @@ async function perguntarIA(pergunta){
     );
   }
 
-  return dados.resposta;
-}function init(){
+  return dados.resposta;}
+
+function init(){
  // V8: remove service workers/caches de versões antigas que podiam manter o gerador quebrado no iOS/Netlify.
  try{
    if('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});
