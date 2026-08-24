@@ -345,7 +345,6 @@ function renderSettings(){$('#settingsName').value=data.settings.name;$('#settin
 
 function parsePrompt(text){const lower=text.toLowerCase();const hours=(lower.match(/(\d+(?:[,.]\d+)?)\s*h/)||[])[1];return{hours:hours?Number(hours.replace(',','.')):null,keywords:data.subjects.filter(s=>lower.includes(s.name.toLowerCase())).map(s=>s.id)}}
  $('#plannerPreview').innerHTML=generatedPlan.length?generatedPlan.map(t=>`<div class="list-row"><div class="list-main"><strong>${fmt(t.date)} · ${t.time} · ${esc(t.title)}</strong><small>${esc(subjectName(t.subjectId))} · ${typeLabel(t.type)}</small></div><span class="pill">${t.duration} min</span></div>`).join(''):'Não foi possível gerar um plano.';$('#applyPlanBtn').disabled=!generatedPlan.lengt
-alert('Sessão concluída.\nO progresso foi registrado e uma revisão pode ter sido agendada.')
 function globalSearch(){const q=$('#globalSearchInput').value.trim().toLowerCase();const out=[];if(q){data.subjects.forEach(s=>{if(s.name.toLowerCase().includes(q))out.push({kind:'Matéria',title:s.name,page:'subjects'});(s.topics||[]).forEach(t=>{if(t.name.toLowerCase().includes(q))out.push({kind:'Assunto',title:t.name+' — '+s.name,page:'subjects'})})});data.tasks.forEach(t=>{if((t.title+' '+subjectName(t.subjectId)).toLowerCase().includes(q))out.push({kind:'Cronograma',title:t.title+' — '+fmt(t.date),page:'schedule'})});data.exams.forEach(e=>{if(e.name.toLowerCase().includes(q))out.push({kind:'Prova',title:e.name+' — '+fmt(e.date),page:'exams'})});data.reviews.forEach(r=>{if(r.content.toLowerCase().includes(q))out.push({kind:'Revisão',title:r.content,page:'reviews'})});data.errors.forEach(e=>{if((e.topic+' '+e.question).toLowerCase().includes(q))out.push({kind:'Erro',title:e.topic,page:'errors'})})}
  $('#globalSearchResults').innerHTML=out.length?out.slice(0,30).map(x=>`<button class="list-row search-result" data-search-go="${x.page}"><span class="list-main"><strong>${esc(x.title)}</strong><small>${x.kind}</small></span><span>→</span></button>`).join(''):'<div class="empty">Digite para pesquisar no seu MEDFLOW.</div>'}
 
@@ -368,7 +367,60 @@ function bind(){
  $('#focusTaskSelect').onchange=()=>{const t=data.tasks.find(x=>x.id===$('#focusTaskSelect').value);if(t)$('#focusGoal').value=t.title};
  document.addEventListener('change',e=>{const el=e.target.closest('[data-topic-progress]');if(el){const[sid,tid]=el.dataset.topicProgress.split('|'),s=subject(sid),t=s?.topics.find(x=>x.id===tid);if(t){t.progress=Math.max(0,Math.min(100,Number(el.value)||0));recalcSubject(s);save();renderSubjects();renderDashboard()}}});
  $$('.modal-backdrop').forEach(m=>m.addEventListener('mousedown',e=>{if(e.target===m)closeModal(m.id)}));document.addEventListener('keydown',e=>{if(e.key==='Escape'){$$('.modal-backdrop.open').forEach(m=>closeModal(m.id))}});window.addEventListener('hashchange',()=>nav(location.hash.slice(1)||'dashboard',false));
+
+
+const aiFab = $('#aiFab');
+const aiModal = $('#aiModal');
+const closeAiBtn = $('#closeAiBtn');
+const askAiBtn = $('#askAiBtn');
+
+if(aiFab){
+  aiFab.onclick = () => {
+    aiModal?.classList.remove('hidden');
+    aiModal?.classList.add('open');
+    aiModal?.setAttribute('aria-hidden','false');
+    $('#aiQuestion')?.focus();
+  };
 }
+
+if(closeAiBtn){
+  closeAiBtn.onclick = () => {
+    aiModal?.classList.remove('open');
+    aiModal?.classList.add('hidden');
+    aiModal?.setAttribute('aria-hidden','true');
+  };
+}
+
+if(askAiBtn){
+  askAiBtn.onclick = async () => {
+    const pergunta = $('#aiQuestion')?.value.trim();
+    const status = $('#aiStatus');
+    const answer = $('#aiAnswer');
+
+    if(!pergunta){
+      if(status) status.textContent = 'Digite uma pergunta.';
+      return;
+    }
+
+    askAiBtn.disabled = true;
+    if(status) status.textContent = 'Pensando...';
+    if(answer) answer.textContent = '';
+
+    try{
+      const resposta = await perguntarIA(pergunta);
+      if(status) status.textContent = '';
+      if(answer) answer.textContent = resposta;
+    }catch(error){
+      console.error(error);
+      if(status) status.textContent =
+        error?.message || 'Não foi possível obter resposta da IA.';
+    }finally{
+      askAiBtn.disabled = false;
+    }
+  };
+}
+
+ }
  const MEDFLOW_AI_URL =
   'https://bkntczfttyyvyhmmclwp.supabase.co/functions/v1/medflow-proxy';
 
