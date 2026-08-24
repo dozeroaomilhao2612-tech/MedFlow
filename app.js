@@ -371,7 +371,39 @@ function bind(){
  document.addEventListener('change',e=>{const el=e.target.closest('[data-topic-progress]');if(el){const[sid,tid]=el.dataset.topicProgress.split('|'),s=subject(sid),t=s?.topics.find(x=>x.id===tid);if(t){t.progress=Math.max(0,Math.min(100,Number(el.value)||0));recalcSubject(s);save();renderSubjects();renderDashboard()}}});
  $$('.modal-backdrop').forEach(m=>m.addEventListener('mousedown',e=>{if(e.target===m)closeModal(m.id)}));document.addEventListener('keydown',e=>{if(e.key==='Escape'){$$('.modal-backdrop.open').forEach(m=>closeModal(m.id))}});window.addEventListener('hashchange',()=>nav(location.hash.slice(1)||'dashboard',false));
 }
-function init(){
+function init(){ const MEDFLOW_AI_URL =
+  'https://bkntczfttyyvyhmmclwp.supabase.co/functions/v1/medflow-proxy';
+
+async function perguntarIA(pergunta){
+  const texto = String(pergunta || '').trim();
+
+  if(!texto){
+    throw new Error('Digite uma pergunta.');
+  }
+
+  const resposta = await fetch(MEDFLOW_AI_URL,{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json'
+    },
+    body:JSON.stringify({
+      pergunta:texto
+   
+  });
+
+  const dados = await resposta.json();
+
+  if(!resposta.ok || !dados.ok){
+    console.error('Erro MEDFLOW IA:', dados);
+    throw new Error(
+      dados?.error ||
+      dados?.details?.error?.message ||
+      'Não foi possível obter resposta da IA.'
+    );
+  }
+
+  return dados.resposta;
+}function init(){
  // V8: remove service workers/caches de versões antigas que podiam manter o gerador quebrado no iOS/Netlify.
  try{
    if('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});
