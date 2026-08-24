@@ -381,15 +381,16 @@ async function perguntarIA(pergunta){
     throw new Error('Digite uma pergunta.');
   }
 
-  const resposta = await fetch(MEDFLOW_AI_URL,{
-    method:'POST',
-    headers:{
-      'Content-Type':'application/json'
-    },
-    body:JSON.stringify({
-      pergunta:texto
-   
-  });
+ 
+    const resposta = await fetch(MEDFLOW_AI_URL,{
+  method:'POST',
+  headers:{
+    'Content-Type':'application/json'
+  },
+  body:JSON.stringify({
+    pergunta:texto
+  })
+});
 
   const dados = await resposta.json();
 
