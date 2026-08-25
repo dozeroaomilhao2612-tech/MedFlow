@@ -412,22 +412,116 @@ function updateQuestionAvailability(){
 }
 
 function startQuiz(){
- const area=$('#questionArea').value,period=$('#questionPeriod').value,discipline=$('#questionDiscipline').value,topic=$('#questionTopic').value;
- let diff=$('#questionDifficulty').value,amount=Number($('#questionAmount').value);if(diff==='adaptive')diff=adaptiveDifficulty();
- const matchesBase=q=>q.track===questionTrack&&(period==='all'||!q.period||q.period===period)&&(discipline==='all'||q.discipline===discipline)&&(questionTrack==='basic'||area==='all'||q.area===area);
- let pool=bank.filter(q=>matchesBase(q)&&(topic==='all'||q.topic===topic)&&q.difficulty===diff&&!q.coverage);
- if(!pool.length)pool=bank.filter(q=>matchesBase(q)&&(topic==='all'||q.topic===topic)&&!q.coverage);
- if(!pool.length&&topic!=='all')pool=bank.filter(q=>q.track===questionTrack&&q.topic===topic&&(discipline==='all'||q.discipline===discipline)&&!q.coverage);
- if(!pool.length)pool=bank.filter(q=>matchesBase(q)&&(topic==='all'||q.topic===topic));
- if(!pool.length)pool=bank.filter(q=>q.track===questionTrack&&!q.coverage);
- if(!pool.length)pool=bank.filter(q=>q.track===questionTrack);
- if(!pool.length)return $('#quizContainer').innerHTML='<div class="empty"><strong>Banco indisponível.</strong><p>Atualize o MEDFLOW e tente novamente.</p></div>';
- const unique=[...new Map(pool.map(q=>[q.id,q])).values()].sort(()=>Math.random()-.5);
- currentQuiz=unique.slice(0,Math.min(amount,unique.length));
- if(!currentQuiz.length)return;
- quizIndex=0;quizScore=0;renderQuiz();
- if(unique.length<amount)announce(`Este recorte possui ${unique.length} questões únicas. O MEDFLOW evitou repetir perguntas.`);
+async function startQuiz(){
+
+  if (!supabaseBank.length) {
+    await carregarQuestoesSupabase();
+  }
+
+  const area = $('#questionArea').value;
+  const period = $('#questionPeriod').value;
+  const discipline = $('#questionDiscipline').value;
+  const topic = $('#questionTopic').value;
+
+  let diff = $('#questionDifficulty').value;
+  const amount = Number($('#questionAmount').value);
+
+  if (diff === 'adaptive') {
+    diff = adaptiveDifficulty();
+  }
+
+  const questionSource = supabaseBank.length
+    ? supabaseBank
+    : bank;
+
+  const matchesBase = q =>
+    q.track === questionTrack &&
+    (period === 'all' || !q.period || q.period === period) &&
+    (discipline === 'all' || q.discipline === discipline) &&
+    (
+      questionTrack === 'basic' ||
+      area === 'all' ||
+      q.area === area
+    );
+
+  let pool = questionSource.filter(
+    q =>
+      matchesBase(q) &&
+      (topic === 'all' || q.topic === topic) &&
+      q.difficulty === diff &&
+      (q.remote || !q.coverage)
+  );
+
+  if (!pool.length) {
+    pool = questionSource.filter(
+      q =>
+        matchesBase(q) &&
+        (topic === 'all' || q.topic === topic) &&
+        (q.remote || !q.coverage)
+    );
+  }
+
+  if (!pool.length && topic !== 'all') {
+    pool = questionSource.filter(
+      q =>
+        q.track === questionTrack &&
+        q.topic === topic &&
+        (discipline === 'all' || q.discipline === discipline) &&
+        (q.remote || !q.coverage)
+    );
+  }
+
+  if (!pool.length) {
+    pool = questionSource.filter(
+      q =>
+        matchesBase(q) &&
+        (topic === 'all' || q.topic === topic)
+    );
+  }
+
+  if (!pool.length) {
+    pool = questionSource.filter(
+      q =>
+        q.track === questionTrack &&
+        (q.remote || !q.coverage)
+    );
+  }
+
+  if (!pool.length) {
+    pool = questionSource.filter(
+      q => q.track === questionTrack
+    );
+  }
+
+  if (!pool.length) {
+    $('#quizContainer').innerHTML =
+      '<div class="empty"><h2>Banco indisponível.</h2><p>Não foram encontradas questões para este filtro.</p></div>';
+    return;
+  }
+
+  const unique = [
+    ...new Map(pool.map(q => [q.id, q])).values()
+  ].sort(() => Math.random() - 0.5);
+
+  currentQuiz = unique.slice(
+    0,
+    Math.min(amount, unique.length)
+  );
+
+  if (!currentQuiz.length) return;
+
+  quizIndex = 0;
+  quizScore = 0;
+
+  renderQuiz();
+
+  if (unique.length < amount) {
+    announce(
+      `Este recorte possui ${unique.length} questões únicas.`
+    );
+  }
 }
+
 
 function renderQuiz(){const c=$('#quizContainer');if(quizIndex>=currentQuiz.length){const pct=Math.round(quizScore/currentQuiz.length*100);c.innerHTML=`<div class="empty"><h2>${pct}%</h2><p>${quizScore} de ${currentQuiz.length} corretas.</p><p>${pct>=80?'Ótimo domínio neste bloco.':pct>=60?'Revise os erros antes do próximo bloco.':'Volte aos conceitos-base e depois refaça questões.'}</p><button class="btn btn-primary" id="newQuizBtn">Novo simulado</button></div>`;$('#newQuizBtn').onclick=startQuiz;renderQuestionStats();renderWeakTopicSummary();return}const q=currentQuiz[quizIndex];quizAnswered=false;c.innerHTML=`<div class="card-header"><div><h3>Questão ${quizIndex+1} de ${currentQuiz.length}</h3><div class="question-meta-line"><span class="pill">${esc(q.discipline||q.subject)}</span><span class="pill">${esc(q.topic)}</span>${q.period?`<span class="pill">${esc(q.period)}º período</span>`:''}<span class="pill">${esc(difficultyLabel(q.difficulty))}</span></div></div></div><div class="question-text">${esc(q.q)}</div>${q.o.map((o,i)=>`<button class="option-btn" data-answer="${i}"><strong>${String.fromCharCode(65+i)})</strong> ${esc(o)}</button>`).join('')}<div id="quizFeedback"></div><button class="btn btn-primary" id="nextQuizBtn" style="display:none;margin-top:15px">Próxima</button>`;$$('[data-answer]').forEach(b=>b.onclick=()=>answerQuestion(Number(b.dataset.answer)));$('#nextQuizBtn').onclick=()=>{quizIndex++;renderQuiz()}}
 function answerQuestion(i){if(quizAnswered)return;quizAnswered=true;const q=currentQuiz[quizIndex],correct=i===q.a;data.performance.answered++;if(correct){quizScore++;data.performance.correct++}const key=(q.discipline||q.subject)+' · '+q.topic;const p=data.performance.topics[key]||{answered:0,correct:0};p.answered++;if(correct)p.correct++;data.performance.topics[key]=p;$$('[data-answer]').forEach((b,j)=>{if(j===q.a)b.classList.add('correct');else if(j===i)b.classList.add('wrong')});$('#quizFeedback').innerHTML=`<div class="feedback"><strong>${correct?'Correto':'Incorreto'}</strong><p>${esc(q.e)}</p><div class="why-wrong"><strong>Alternativas:</strong>${q.w.map((x,j)=>`<div>${String.fromCharCode(65+j)}) ${esc(x)}</div>`).join('')}</div>${q.reference?`<div class="question-ref"><strong>Onde revisar:</strong><br>${esc(q.reference)}${q.refTopic?`<br><small>Tema: ${esc(q.refTopic)}</small>`:''}</div>`:''}${!correct?'<p><strong>Agora registre o motivo do erro.</strong></p>':''}</div>`;$('#nextQuizBtn').style.display='inline-block';save();renderQuestionStats();if(!correct){pendingWrong={q,selected:i};openModal('errorReasonModal')}}
