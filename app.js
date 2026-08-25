@@ -551,8 +551,45 @@ function renderSettings(){$('#settingsName').value=data.settings.name;$('#settin
 
 function parsePrompt(text){const lower=text.toLowerCase();const hours=(lower.match(/(\d+(?:[,.]\d+)?)\s*h/)||[])[1];return{hours:hours?Number(hours.replace(',','.')):null,keywords:data.subjects.filter(s=>lower.includes(s.name.toLowerCase())).map(s=>s.id)}}
  $('#plannerPreview').innerHTML=generatedPlan.length?generatedPlan.map(t=>`<div class="list-row"><div class="list-main"><strong>${fmt(t.date)} · ${t.time} · ${esc(t.title)}</strong><small>${esc(subjectName(t.subjectId))} · ${typeLabel(t.type)}</small></div><span class="pill">${t.duration} min</span></div>`).join(''):'Não foi possível gerar um plano.';$('#applyPlanBtn').disabled=!generatedPlan.lengt
-function globalSearch(){const q=$('#globalSearchInput').value.trim().toLowerCase();const out=[];if(q){data.subjects.forEach(s=>{if(s.name.toLowerCase().includes(q))out.push({kind:'Matéria',title:s.name,page:'subjects'});(s.topics||[]).forEach(t=>{if(t.name.toLowerCase().includes(q))out.push({kind:'Assunto',title:t.name+' — '+s.name,page:'subjects'})})});data.tasks.forEach(t=>{if((t.title+' '+subjectName(t.subjectId)).toLowerCase().includes(q))out.push({kind:'Cronograma',title:t.title+' — '+fmt(t.date),page:'schedule'})});data.exams.forEach(e=>{if(e.name.toLowerCase().includes(q))out.push({kind:'Prova',title:e.name+' — '+fmt(e.date),page:'exams'})});data.reviews.forEach(r=>{if(r.content.toLowerCase().includes(q))out.push({kind:'Revisão',title:r.content,page:'reviews'})});data.errors.forEach(e=>{if((e.topic+' '+e.question).toLowerCase().includes(q))out.push({kind:'Erro',title:e.topic,page:'errors'})})}
- $('#globalSearchResults').innerHTML=out.length?out.slice(0,30).map(x=>`<button class="list-row search-result" data-search-go="${x.page}"><span class="list-main"><strong>${esc(x.title)}</strong><small>${x.kind}</small></span><span>→</span></button>`).join(''):'<div class="empty">Digite para pesquisar no seu MEDFLOW.</div>'}
+function globalSearch(){
+  const q = $('#globalSearchInput')?.value.trim().toLowerCase() || '';
+  const out = [];
+
+  if (q) {
+    (data.subjects || []).forEach(s => {
+      if ((s.name || '').toLowerCase().includes(q)) {
+        out.push({
+          kind: 'Matéria',
+          title: s.name,
+          page: 'subjects'
+        });
+      }
+
+      (s.topics || []).forEach(t => {
+        if ((t.name || '').toLowerCase().includes(q)) {
+          out.push({
+            kind: 'Assunto',
+            title: `${s.name} — ${t.name}`,
+            page: 'subjects'
+          });
+        }
+      });
+    });
+  }
+
+  const results = $('#globalSearchResults');
+  if (!results) return;
+
+  results.innerHTML = out.length
+    ? out.slice(0, 30).map(x => `
+        <button class="list-row search-result" data-search-go="${x.page}">
+          <span class="list-main">
+            <strong>${esc(x.title)}</strong>
+            <small>${esc(x.kind)}</small>
+          </span>
+        </button>
+      `).join('')
+    : '<div class="empty">Digite para pesquisar no seu MEDFLOW.</div>';
 }
   function bind()
  document.addEventListener('click',e=>{const n=e.target.closest('[data-page],[data-go]');if(n){e.preventDefault();nav(n.dataset.page||n.dataset.go);return}const c=e.target.closest('[data-close]');if(c){closeModal(c.dataset.close);return}
