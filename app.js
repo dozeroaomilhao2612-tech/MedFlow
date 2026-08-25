@@ -591,7 +591,7 @@ function globalSearch(){
       `).join('')
     : '<div class="empty">Digite para pesquisar no seu MEDFLOW.</div>';
 }
-  function bind()
+  function bind(){
  document.addEventListener('click',e=>{const n=e.target.closest('[data-page],[data-go]');if(n){e.preventDefault();nav(n.dataset.page||n.dataset.go);return}const c=e.target.closest('[data-close]');if(c){closeModal(c.dataset.close);return}
  const et=e.target.closest('[data-edit-task]');if(et){openTask(data.tasks.find(t=>t.id===et.dataset.editTask));return}const dt=e.target.closest('[data-delete-task]');if(dt){data.tasks=data.tasks.filter(t=>t.id!==dt.dataset.deleteTask);save();renderSchedule();renderDashboard();return}const tt=e.target.closest('[data-toggle-task]');if(tt){const t=data.tasks.find(x=>x.id===tt.dataset.toggleTask);if(t)t.completed=!t.completed;save();renderSchedule();renderDashboard();return}
  const es=e.target.closest('[data-edit-subject]');if(es){openSubject(subject(es.dataset.editSubject));return}const ds=e.target.closest('[data-delete-subject]');if(ds&&confirm('Excluir esta matéria?')){data.subjects=data.subjects.filter(s=>s.id!==ds.dataset.deleteSubject);save();renderSubjects();renderDashboard();return}const at=e.target.closest('[data-add-topic]');if(at){openTopic(at.dataset.addTopic);return}const delT=e.target.closest('[data-delete-topic]');if(delT){const[sid,tid]=delT.dataset.deleteTopic.split('|'),s=subject(sid);s.topics=s.topics.filter(t=>t.id!==tid);recalcSubject(s);save();renderSubjects();return}
