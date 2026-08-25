@@ -454,7 +454,54 @@ async function perguntarIA(pergunta){
   }
 
   return dados.resposta;}
+window.responderQuestaoBanco = async function(questionId, selectedOption) {
+  const sb = window.medflowSupabase;
 
+  if (!sb) {
+    throw new Error('Supabase não inicializado.');
+  }
+
+  const {
+    data: { session },
+    error: sessionError
+  } = await sb.auth.getSession();
+
+  if (sessionError) {
+    throw sessionError;
+  }
+
+  if (!session?.access_token) {
+    throw new Error('Sessão não encontrada. Faça login novamente.');
+  }
+
+  const resposta = await fetch(
+    `${window.MEDFLOW_SUPABASE_URL}/functions/v1/medflow-answer`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+        'apikey': window.MEDFLOW_SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({
+        question_id: Number(questionId),
+        selected_option: String(selectedOption).toUpperCase()
+      })
+    }
+  );
+
+  const dados = await resposta.json();
+
+  if (!resposta.ok || !dados.ok) {
+    throw new Error(
+      dados?.error ||
+      dados?.details ||
+      'Não foi possível corrigir a questão.'
+    );
+  }
+
+  return dados;
+};
 function init(){
  // V8: remove service workers/caches de versões antigas que podiam manter o gerador quebrado no iOS/Netlify.
  try{
