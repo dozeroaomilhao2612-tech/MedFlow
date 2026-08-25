@@ -411,7 +411,6 @@ function updateQuestionAvailability(){
  c.textContent=`${p.length} questão${p.length===1?'':'ões'} disponíveis neste recorte`;
 }
 
-function startQuiz(){
 async function startQuiz(){
 
   if (!supabaseBank.length) {
