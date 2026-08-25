@@ -719,4 +719,4 @@ function init(){
 }
 
 init();
-
+})();
