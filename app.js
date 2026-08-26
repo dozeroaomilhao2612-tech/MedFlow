@@ -529,7 +529,185 @@ function difficultyLabel(value) {
   }[value] || value || '';
 }
 function renderQuiz(){const c=$('#quizContainer');if(quizIndex>=currentQuiz.length){const pct=Math.round(quizScore/currentQuiz.length*100);c.innerHTML=`<div class="empty"><h2>${pct}%</h2><p>${quizScore} de ${currentQuiz.length} corretas.</p><p>${pct>=80?'Ótimo domínio neste bloco.':pct>=60?'Revise os erros antes do próximo bloco.':'Volte aos conceitos-base e depois refaça questões.'}</p><button class="btn btn-primary" id="newQuizBtn">Novo simulado</button></div>`;$('#newQuizBtn').onclick=startQuiz;renderQuestionStats();renderWeakTopicSummary();return}const q=currentQuiz[quizIndex];quizAnswered=false;c.innerHTML=`<div class="card-header"><div><h3>Questão ${quizIndex+1} de ${currentQuiz.length}</h3><div class="question-meta-line"><span class="pill">${esc(q.discipline||q.subject)}</span><span class="pill">${esc(q.topic)}</span>${q.period?`<span class="pill">${esc(q.period)}º período</span>`:''}<span class="pill">${esc(difficultyLabel(q.difficulty))}</span></div></div></div><div class="question-text">${esc(q.q)}</div>${q.o.map((o,i)=>`<button class="option-btn" data-answer="${i}"><strong>${String.fromCharCode(65+i)})</strong> ${esc(o)}</button>`).join('')}<div id="quizFeedback"></div><button class="btn btn-primary" id="nextQuizBtn" style="display:none;margin-top:15px">Próxima</button>`;$$('[data-answer]').forEach(b=>b.onclick=()=>answerQuestion(Number(b.dataset.answer)));$('#nextQuizBtn').onclick=()=>{quizIndex++;renderQuiz()}}
-function answerQuestion(i){if(quizAnswered)return;quizAnswered=true;const q=currentQuiz[quizIndex],correct=i===q.a;data.performance.answered++;if(correct){quizScore++;data.performance.correct++}const key=(q.discipline||q.subject)+' · '+q.topic;const p=data.performance.topics[key]||{answered:0,correct:0};p.answered++;if(correct)p.correct++;data.performance.topics[key]=p;$$('[data-answer]').forEach((b,j)=>{if(j===q.a)b.classList.add('correct');else if(j===i)b.classList.add('wrong')});$('#quizFeedback').innerHTML=`<div class="feedback"><strong>${correct?'Correto':'Incorreto'}</strong><p>${esc(q.e)}</p><div class="why-wrong"><strong>Alternativas:</strong>${q.w.map((x,j)=>`<div>${String.fromCharCode(65+j)}) ${esc(x)}</div>`).join('')}</div>${q.reference?`<div class="question-ref"><strong>Onde revisar:</strong><br>${esc(q.reference)}${q.refTopic?`<br><small>Tema: ${esc(q.refTopic)}</small>`:''}</div>`:''}${!correct?'<p><strong>Agora registre o motivo do erro.</strong></p>':''}</div>`;$('#nextQuizBtn').style.display='inline-block';save();renderQuestionStats();if(!correct){pendingWrong={q,selected:i};openModal('errorReasonModal')}}
+async function answerQuestion(i) {
+  if (quizAnswered) return;
+
+  quizAnswered = true;
+
+  const q = currentQuiz[quizIndex];
+
+  // QUESTÕES VINDAS DO SUPABASE
+  if (q.remote) {
+    try {
+      const selectedLetter =
+        q.optionLetters?.[i] ||
+        String.fromCharCode(65 + i);
+
+      const dados = await window.responderQuestaoBanco(
+        q.dbId,
+        selectedLetter
+      );
+
+      const correct = dados.correct === true;
+
+      data.performance.answered++;
+
+      if (correct) {
+        quizScore++;
+        data.performance.correct++;
+      }
+
+      const key =
+        q.discipline ||
+        q.subject ||
+        q.topic ||
+        "Geral";
+
+      if (!data.performance.topics) {
+        data.performance.topics = {};
+      }
+
+      if (!data.performance.topics[key]) {
+        data.performance.topics[key] = {
+          answered: 0,
+          correct: 0
+        };
+      }
+
+      data.performance.topics[key].answered++;
+
+      if (correct) {
+        data.performance.topics[key].correct++;
+      }
+
+      $$('[data-answer]').forEach((btn, index) => {
+        btn.disabled = true;
+
+        if (index === i) {
+          btn.classList.add(correct ? "correct" : "wrong");
+        }
+      });
+
+      const feedback = $("#quizFeedback");
+
+      if (feedback) {
+        const explanation =
+          dados.explanation ||
+          dados.explicacao ||
+          dados.feedback ||
+          "";
+
+        feedback.innerHTML = `
+          <strong>
+            ${correct ? "Resposta correta!" : "Resposta incorreta."}
+          </strong>
+          ${explanation ? `<p>${esc(explanation)}</p>` : ""}
+        `;
+      }
+
+      $("#nextQuizBtn").style.display = "inline-block";
+
+      save();
+      renderQuestionStats();
+
+      if (!correct) {
+        pendingWrong = {
+          q,
+          selected: i
+        };
+
+        openModal("errorReasonModal");
+      }
+
+      return;
+
+    } catch (error) {
+      console.error(
+        "MEDFLOW: erro ao corrigir questão do Supabase:",
+        error
+      );
+
+      const feedback = $("#quizFeedback");
+
+      if (feedback) {
+        feedback.innerHTML = `
+          <strong>Não foi possível corrigir a questão.</strong>
+          <p>${esc(error?.message || "Tente novamente.")}</p>
+        `;
+      }
+
+      quizAnswered = false;
+      return;
+    }
+  }
+
+  // QUESTÕES ANTIGAS/LOCAIS
+  const correct = i === q.a;
+
+  data.performance.answered++;
+
+  if (correct) {
+    quizScore++;
+    data.performance.correct++;
+  }
+
+  const key =
+    q.discipline ||
+    q.subject ||
+    q.topic ||
+    "Geral";
+
+  if (!data.performance.topics) {
+    data.performance.topics = {};
+  }
+
+  if (!data.performance.topics[key]) {
+    data.performance.topics[key] = {
+      answered: 0,
+      correct: 0
+    };
+  }
+
+  data.performance.topics[key].answered++;
+
+  if (correct) {
+    data.performance.topics[key].correct++;
+  }
+
+  $$('[data-answer]').forEach((btn, index) => {
+    btn.disabled = true;
+
+    if (index === q.a) {
+      btn.classList.add("correct");
+    }
+
+    if (index === i && !correct) {
+      btn.classList.add("wrong");
+    }
+  });
+
+  const feedback = $("#quizFeedback");
+
+  if (feedback) {
+    feedback.innerHTML = correct
+      ? `<strong>Resposta correta!</strong>`
+      : `<strong>Resposta incorreta.</strong>`;
+  }
+
+  $("#nextQuizBtn").style.display = "inline-block";
+
+  save();
+  renderQuestionStats();
+
+  if (!correct) {
+    pendingWrong = {
+      q,
+      selected: i
+    };
+
+    openModal("errorReasonModal");
+  }
+}
 function recordError(reason){if(!pendingWrong)return;const q=pendingWrong.q;data.errors.unshift({id:uid(),questionId:q.id,topic:q.topic,subject:q.discipline||q.subject,question:q.q,selected:pendingWrong.selected,correct:q.a,reason,date:today(),retry:iso(addDays(new Date(),3)),track:q.track,reference:q.reference||''});const subj=data.subjects.find(s=>s.name===(q.discipline||q.subject));data.reviews.push({id:uid(),content:(q.discipline||q.subject)+' — '+q.topic+' · erro em questão',subjectId:subj?.id||'',next:iso(addDays(new Date(),3)),level:1,source:'error'});save();pendingWrong=null;closeModal('errorReasonModal');renderErrors();renderReviews();announce('Erro registrado e revisão agendada')}
 function renderQuestionStats(){$('#questionsAnswered').textContent=data.performance.answered;$('#questionsCorrect').textContent=data.performance.correct;$('#questionsAccuracy').textContent=(data.performance.answered?Math.round(data.performance.correct/data.performance.answered*100):0)+'%'}
 function renderWeakTopicSummary(){const list=Object.entries(data.performance.topics).filter(([,p])=>p.answered>=1).map(([topic,p])=>({topic,acc:Math.round(p.correct/p.answered*100)})).sort((a,b)=>a.acc-b.acc);$('#weakTopicSummary').textContent=list.length?`Ponto de atenção: ${list[0].topic} (${list[0].acc}% de acerto).`:'Responda questões para o MEDFLOW identificar seus pontos fracos.'}
