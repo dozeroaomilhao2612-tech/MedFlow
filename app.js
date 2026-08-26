@@ -429,9 +429,14 @@ async function startQuiz(){
     diff = adaptiveDifficulty();
   }
 
-  const questionSource = supabaseBank.length
-    ? supabaseBank
-    : bank;
+const questionSource = [
+  ...supabaseBank,
+  ...bank.filter(localQuestion =>
+    !supabaseBank.some(remoteQuestion =>
+      remoteQuestion.id === localQuestion.id
+    )
+  )
+];
 
   const matchesBase = q =>
     q.track === questionTrack &&
