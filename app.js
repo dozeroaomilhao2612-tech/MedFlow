@@ -807,7 +807,7 @@ if (pe) {
   startQuiz();
 
   return;
-});
+}});
  $$('[data-reason]').forEach(b=>b.onclick=()=>recordError(b.dataset.reason));
  $$('[data-track-choice]').forEach(b=>b.onclick=()=>setQuestionTrack(b.dataset.trackChoice));$('#questionPeriod').onchange=populateQuestionFilters;$('#questionDiscipline').onchange=populateQuestionFilters;$('#myPeriodQuizBtn').onclick=()=>{const m=(data.settings.period||'2º').match(/\d+/);const p=m?Number(m[0]):2;setQuestionTrack(p<=4?'basic':p<=8?'clinical':p<=12?'internship':'residency');if(p<=12&&$('#questionPeriod')){$('#questionPeriod').value=String(p);populateQuestionFilters()}$('#questionDifficulty').value='adaptive';startQuiz()};
  $('#quickTaskBtn').onclick=()=>openTask();$('#addScheduleBtn').onclick=()=>openTask();$('#saveTaskBtn').onclick=saveTask;$('#addSubjectBtn').onclick=()=>openSubject();$('#saveSubjectBtn').onclick=saveSubject;$('#saveTopicBtn').onclick=saveTopic;$('#subjectSearch').oninput=renderSubjects;$('#subjectSort').onchange=renderSubjects;
