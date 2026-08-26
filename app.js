@@ -773,8 +773,42 @@ function globalSearch(){
  document.addEventListener('click',e=>{const n=e.target.closest('[data-page],[data-go]');if(n){e.preventDefault();nav(n.dataset.page||n.dataset.go);return}const c=e.target.closest('[data-close]');if(c){closeModal(c.dataset.close);return}
  const et=e.target.closest('[data-edit-task]');if(et){openTask(data.tasks.find(t=>t.id===et.dataset.editTask));return}const dt=e.target.closest('[data-delete-task]');if(dt){data.tasks=data.tasks.filter(t=>t.id!==dt.dataset.deleteTask);save();renderSchedule();renderDashboard();return}const tt=e.target.closest('[data-toggle-task]');if(tt){const t=data.tasks.find(x=>x.id===tt.dataset.toggleTask);if(t)t.completed=!t.completed;save();renderSchedule();renderDashboard();return}
  const es=e.target.closest('[data-edit-subject]');if(es){openSubject(subject(es.dataset.editSubject));return}const ds=e.target.closest('[data-delete-subject]');if(ds&&confirm('Excluir esta matéria?')){data.subjects=data.subjects.filter(s=>s.id!==ds.dataset.deleteSubject);save();renderSubjects();renderDashboard();return}const at=e.target.closest('[data-add-topic]');if(at){openTopic(at.dataset.addTopic);return}const delT=e.target.closest('[data-delete-topic]');if(delT){const[sid,tid]=delT.dataset.deleteTopic.split('|'),s=subject(sid);s.topics=s.topics.filter(t=>t.id!==tid);recalcSubject(s);save();renderSubjects();return}
- const re=e.target.closest('[data-review]');if(re){completeReview(re.dataset.review);return}const dr=e.target.closest('[data-delete-review]');if(dr){data.reviews=data.reviews.filter(r=>r.id!==dr.dataset.deleteReview);save();renderReviews();return}const de=e.target.closest('[data-delete-exam]');if(de){data.exams=data.exams.filter(x=>x.id!==de.dataset.deleteExam);save();renderExams();renderDashboard();return}const pe=e.target.closest('[data-practice-error]');if(pe){nav('questions');$('#questionArea').value='all';startQuiz();return}const sg=e.target.closest('[data-search-go]');if(sg){closeModal('searchModal');nav(sg.dataset.searchGo);return}
- });
+ const re=e.target.closest('[data-review]');if(re){completeReview(re.dataset.review);return}const dr=e.target.closest('[data-delete-review]');if(dr){data.reviews=data.reviews.filter(r=>r.id!==dr.dataset.deleteReview);save();renderReviews();return}const de=e.target.closest('[data-delete-exam]');if(de){data.exams=data.exams.filter(x=>x.id!==de.dataset.deleteExam);save();renderExams();renderDashboard();return}const pe = e.target.closest('[data-practice-error]');
+const pe = e.target.closest('[data-practice-error]');
+
+if (pe) {
+  const topic = pe.dataset.practiceError;
+
+  nav('questions');
+
+  populateQuestionFilters();
+
+  const topicSelect = $('#questionTopic');
+  const areaSelect = $('#questionArea');
+  const difficultySelect = $('#questionDifficulty');
+
+  if (areaSelect) {
+    areaSelect.value = 'all';
+  }
+
+  if (difficultySelect) {
+    difficultySelect.value = 'adaptive';
+  }
+
+  if (topicSelect) {
+    const existe = [...topicSelect.options]
+      .some(option => option.value === topic);
+
+    if (existe) {
+      topicSelect.value = topic;
+    }
+  }
+
+  updateQuestionAvailability();
+  startQuiz();
+
+  return;
+});
  $$('[data-reason]').forEach(b=>b.onclick=()=>recordError(b.dataset.reason));
  $$('[data-track-choice]').forEach(b=>b.onclick=()=>setQuestionTrack(b.dataset.trackChoice));$('#questionPeriod').onchange=populateQuestionFilters;$('#questionDiscipline').onchange=populateQuestionFilters;$('#myPeriodQuizBtn').onclick=()=>{const m=(data.settings.period||'2º').match(/\d+/);const p=m?Number(m[0]):2;setQuestionTrack(p<=4?'basic':p<=8?'clinical':p<=12?'internship':'residency');if(p<=12&&$('#questionPeriod')){$('#questionPeriod').value=String(p);populateQuestionFilters()}$('#questionDifficulty').value='adaptive';startQuiz()};
  $('#quickTaskBtn').onclick=()=>openTask();$('#addScheduleBtn').onclick=()=>openTask();$('#saveTaskBtn').onclick=saveTask;$('#addSubjectBtn').onclick=()=>openSubject();$('#saveSubjectBtn').onclick=saveSubject;$('#saveTopicBtn').onclick=saveTopic;$('#subjectSearch').oninput=renderSubjects;$('#subjectSort').onchange=renderSubjects;
