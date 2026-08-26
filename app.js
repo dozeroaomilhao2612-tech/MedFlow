@@ -794,14 +794,18 @@ if (pe) {
     difficultySelect.value = 'adaptive';
   }
 
-  if (topicSelect) {
-    const existe = [...topicSelect.options]
-      .some(option => option.value === topic);
+if (topicSelect) {
+  const normalizedTopic = String(topic || '').trim().toLowerCase();
 
-    if (existe) {
-      topicSelect.value = topic;
-    }
+  const matchingOption = [...topicSelect.options].find(option =>
+    String(option.value || '').trim().toLowerCase() === normalizedTopic ||
+    String(option.textContent || '').trim().toLowerCase() === normalizedTopic
+  );
+
+  if (matchingOption) {
+    topicSelect.value = matchingOption.value;
   }
+}
 
   updateQuestionAvailability();
   startQuiz();
