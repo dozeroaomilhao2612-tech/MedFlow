@@ -456,7 +456,7 @@ const questionSource = [
       (q.remote || !q.coverage)
   );
 
-  if (!pool.length) {
+  if (pool.length < amount) {
     pool = questionSource.filter(
       q =>
         matchesBase(q) &&
