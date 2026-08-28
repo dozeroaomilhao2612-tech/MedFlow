@@ -465,7 +465,7 @@ const questionSource = [
     );
   }
 
-  if (!pool.length && topic !== 'all') {
+ if (pool.length < amount && topic !== 'all') {
     pool = questionSource.filter(
       q =>
         q.track === questionTrack &&
@@ -475,7 +475,7 @@ const questionSource = [
     );
   }
 
-  if (!pool.length) {
+ if (pool.length < amount) {
     pool = questionSource.filter(
       q =>
         matchesBase(q) &&
@@ -483,7 +483,7 @@ const questionSource = [
     );
   }
 
-  if (!pool.length) {
+  if (pool.length < amount) {
     pool = questionSource.filter(
       q =>
         q.track === questionTrack &&
@@ -491,7 +491,7 @@ const questionSource = [
     );
   }
 
-  if (!pool.length) {
+  if (pool.length < amount) {
     pool = questionSource.filter(
       q => q.track === questionTrack
     );
