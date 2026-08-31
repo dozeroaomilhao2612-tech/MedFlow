@@ -490,7 +490,18 @@ const questionSource = [
       '<div class="empty"><h2>Banco indisponível.</h2><p>Não foram encontradas questões para este filtro.</p></div>';
     return;
   }
+console.log('MEDFLOW DEBUG - pool:', pool.length);
 
+console.table(
+  pool.map(q => ({
+    id: q.id,
+    disciplina: q.discipline,
+    tema: q.topic,
+    periodo: q.period,
+    dificuldade: q.difficulty,
+    remote: q.remote
+  }))
+);
   const unique = [
     ...new Map(pool.map(q => [q.id, q])).values()
   ].sort(() => Math.random() - 0.5);
