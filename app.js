@@ -403,12 +403,42 @@ function populateQuestionFilters(){
 }
 
 
-function updateQuestionAvailability(){
- const c=$('#questionBankCount'); if(!c)return;
- const period=$('#questionPeriod')?.value||'all',disc=$('#questionDiscipline')?.value||'all',topic=$('#questionTopic')?.value||'all';
- let p=bank.filter(q=>q.track===questionTrack&&(period==='all'||!q.period||q.period===period)&&(disc==='all'||q.discipline===disc)&&(topic==='all'||q.topic===topic)&&!q.coverage);
- if(!p.length)p=bank.filter(q=>q.track===questionTrack&&(disc==='all'||q.discipline===disc)&&(topic==='all'||q.topic===topic));
- c.textContent=`${p.length} questão${p.length===1?'':'ões'} disponíveis neste recorte`;
+function updateQuestionAvailability() {
+  const c = $('#questionBankCount');
+  if (!c) return;
+
+  const period = $('#questionPeriod')?.value || 'all';
+  const discipline = $('#questionDiscipline')?.value || 'all';
+  const topic = $('#questionTopic')?.value || 'all';
+  const area = $('#questionArea')?.value || 'all';
+
+  const questionSource = [
+    ...supabaseBank,
+    ...bank.filter(localQuestion =>
+      !supabaseBank.some(remoteQuestion =>
+        remoteQuestion.id === localQuestion.id
+      )
+    )
+  ];
+
+  const available = questionSource.filter(q =>
+    q.track === questionTrack &&
+    (period === 'all' || !q.period || q.period === period) &&
+    (discipline === 'all' || q.discipline === discipline) &&
+    (topic === 'all' || q.topic === topic) &&
+    (
+      questionTrack === 'basic' ||
+      area === 'all' ||
+      q.area === area
+    )
+  );
+
+  const unique = [
+    ...new Map(available.map(q => [q.id, q])).values()
+  ];
+
+  c.textContent =
+    `${unique.length} questão${unique.length === 1 ? '' : 'ões'} disponíveis neste recorte`;
 }
 
 async function startQuiz(){
