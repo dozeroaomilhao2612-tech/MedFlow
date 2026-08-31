@@ -483,19 +483,7 @@ const questionSource = [
     );
   }
 
-  if (pool.length < amount) {
-    pool = questionSource.filter(
-      q =>
-        q.track === questionTrack &&
-        (q.remote || !q.coverage)
-    );
-  }
-
-  if (pool.length < amount) {
-    pool = questionSource.filter(
-      q => q.track === questionTrack
-    );
-  }
+  
 
   if (!pool.length) {
     $('#quizContainer').innerHTML =
