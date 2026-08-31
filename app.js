@@ -429,6 +429,7 @@ async function startQuiz(){
     diff = adaptiveDifficulty();
   }
 
+
 const questionSource = [
   ...supabaseBank,
   ...bank.filter(localQuestion =>
@@ -437,6 +438,19 @@ const questionSource = [
     )
   )
 ];
+
+console.table(
+  bank
+    .filter(q =>
+      q.discipline === 'Neuroanatomia' &&
+      q.topic === 'Medula espinal'
+    )
+    .map(q => ({
+      id: q.id,
+      estaNoSupabase: supabaseBank.some(r => r.id === q.id)
+    }))
+);
+
 
   const matchesBase = q =>
     q.track === questionTrack &&
