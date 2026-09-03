@@ -440,6 +440,36 @@ function updateQuestionAvailability() {
   c.textContent =
     `${unique.length} questão${unique.length === 1 ? '' : 'ões'} disponíveis neste recorte`;
 }
+  const area = $('#questionArea')?.value || 'all';
+
+  const questionSource = [
+    ...supabaseBank,
+    ...bank.filter(localQuestion =>
+      !supabaseBank.some(remoteQuestion =>
+        remoteQuestion.id === localQuestion.id
+      )
+    )
+  ];
+
+  const available = questionSource.filter(q =>
+    q.track === questionTrack &&
+    (period === 'all' || !q.period || q.period === period) &&
+    (discipline === 'all' || q.discipline === discipline) &&
+    (topic === 'all' || q.topic === topic) &&
+    (
+      questionTrack === 'basic' ||
+      area === 'all' ||
+      q.area === area
+    )
+  );
+
+  const unique = [
+    ...new Map(available.map(q => [q.id, q])).values()
+  ];
+
+  c.textContent =
+    `${unique.length} questão${unique.length === 1 ? '' : 'ões'} disponíveis neste recorte`;
+}
 
 async function startQuiz(){
 
@@ -448,6 +478,11 @@ async function startQuiz(){
   }
 
   const area = $('#questionArea').value;
+ let diff = $('#questionDifficulty')?.value || 'medium';
+
+if (diff === 'adaptive') {
+  diff = adaptiveDifficulty();
+}
   const period = $('#questionPeriod').value;
   const discipline = $('#questionDiscipline').value;
   const topic = $('#questionTopic').value;
