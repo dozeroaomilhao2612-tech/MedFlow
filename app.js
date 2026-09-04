@@ -411,6 +411,11 @@ function updateQuestionAvailability() {
   const discipline = $('#questionDiscipline')?.value || 'all';
   const topic = $('#questionTopic')?.value || 'all';
   const area = $('#questionArea')?.value || 'all';
+ let diff = $('#questionDifficulty')?.value || 'medium';
+
+if (diff === 'adaptive') {
+  diff = adaptiveDifficulty();
+}
 
   const questionSource = [
     ...supabaseBank,
@@ -426,6 +431,8 @@ function updateQuestionAvailability() {
     (period === 'all' || !q.period || q.period === period) &&
     (discipline === 'all' || q.discipline === discipline) &&
     (topic === 'all' || q.topic === topic) &&
+   q.difficulty === diff &&
+(q.remote || !q.coverage) &&
     (
       questionTrack === 'basic' ||
       area === 'all' ||
@@ -440,36 +447,7 @@ function updateQuestionAvailability() {
   c.textContent =
     `${unique.length} questão${unique.length === 1 ? '' : 'ões'} disponíveis neste recorte`;
 }
-  const area = $('#questionArea')?.value || 'all';
-
-  const questionSource = [
-    ...supabaseBank,
-    ...bank.filter(localQuestion =>
-      !supabaseBank.some(remoteQuestion =>
-        remoteQuestion.id === localQuestion.id
-      )
-    )
-  ];
-
-  const available = questionSource.filter(q =>
-    q.track === questionTrack &&
-    (period === 'all' || !q.period || q.period === period) &&
-    (discipline === 'all' || q.discipline === discipline) &&
-    (topic === 'all' || q.topic === topic) &&
-    (
-      questionTrack === 'basic' ||
-      area === 'all' ||
-      q.area === area
-    )
-  );
-
-  const unique = [
-    ...new Map(available.map(q => [q.id, q])).values()
-  ];
-
-  c.textContent =
-    `${unique.length} questão${unique.length === 1 ? '' : 'ões'} disponíveis neste recorte`;
-}
+  
 
 async function startQuiz(){
 
@@ -487,7 +465,7 @@ if (diff === 'adaptive') {
   const discipline = $('#questionDiscipline').value;
   const topic = $('#questionTopic').value;
 
-  let diff = $('#questionDifficulty').value;
+  
   const amount = Number($('#questionAmount').value);
 
   if (diff === 'adaptive') {
