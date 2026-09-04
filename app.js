@@ -250,6 +250,7 @@ async function carregarQuestoesSupabase() {
     console.log(
       `MEDFLOW: ${supabaseBank.length} questões carregadas do Supabase.`
     );
+   updateQuestionAvailability();
 
     return supabaseBank;
 
