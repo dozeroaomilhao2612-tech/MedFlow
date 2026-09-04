@@ -411,11 +411,7 @@ function updateQuestionAvailability() {
   const period = $('#questionPeriod')?.value || 'all';
   const discipline = $('#questionDiscipline')?.value || 'all';
   const topic = $('#questionTopic')?.value || 'all';
-  const area = $('#questionArea')?.value || 'all';
- let diff = $('#questionDifficulty')?.value || 'medium';
-
-if (diff === 'adaptive') {
-  diff = adaptiveDifficulty();
+  
 }
 
   const questionSource = [
@@ -432,10 +428,10 @@ if (diff === 'adaptive') {
     (period === 'all' || !q.period || q.period === period) &&
     (discipline === 'all' || q.discipline === discipline) &&
     (topic === 'all' || q.topic === topic) &&
-   q.difficulty === diff &&
+   
 (q.remote || !q.coverage) &&
     (
-      questionTrack === 'basic' ||
+      
       area === 'all' ||
       q.area === area
     )
